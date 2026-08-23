@@ -4,40 +4,103 @@ import { Link } from "react-router-dom";
 function Cart() {
   const { items, updateQuantity, removeFromCart, clearCart, totalPrice } =
     useCart();
+
   if (items.length === 0) {
-    <div>
-      <p>No Items in Cart</p>
-      <Link to={"/"}>Continue Sopping</Link>
-    </div>;
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12 text-center">
+        <h2 className="text-xl font-bold text-slate-800 mb-2">
+          No Items in Cart
+        </h2>
+        <p className="text-slate-500 mb-6">
+          Your shopping cart is currently empty.
+        </p>
+        <Link
+          to="/"
+          className="inline-block bg-slate-900 hover:bg-slate-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
+        >
+          Continue Shopping
+        </Link>
+      </div>
+    );
   }
+
   return (
-    <div>
-      <h1>Your Cart</h1>
-      <div>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">Your Cart</h1>
+
+      {/* Cart Items List */}
+      <div className="space-y-4 mb-6">
         {items.map(({ product, quantity }) => (
-          <div key={product.id}>
-            <img src={product.image} alt={product.title} />
-            <div>
-              <p>{product.title}</p>
-              <p>{product.price.toFixed(2)}</p>
+          <div
+            key={product.id}
+            className="bg-white rounded-xl border p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
+          >
+            <div className="flex items-center gap-4 flex-1">
+              <img
+                src={product.image}
+                alt={product.title}
+                className="w-16 h-16 object-contain"
+              />
+              <div>
+                <h3 className="font-medium text-slate-800 text-sm line-clamp-1">
+                  {product.title}
+                </h3>
+                <p className="text-slate-500 text-sm font-bold mt-1">
+                  ${product.price.toFixed(2)}
+                </p>
+              </div>
             </div>
-            <div>
-              <button onClick={() => updateQuantity(product.id, quantity - 1)}>
+
+            {/* Quantity Controls */}
+            <div className="flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-lg">
+              <button
+                onClick={() => updateQuantity(product.id, quantity - 1)}
+                className="w-6 h-6 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-200 rounded"
+              >
                 -
               </button>
-              <p>{quantity}</p>
-              <button onClick={() => updateQuantity(product.id, quantity + 1)}>
+              <span className="font-semibold text-sm w-6 text-center">
+                {quantity}
+              </span>
+              <button
+                onClick={() => updateQuantity(product.id, quantity + 1)}
+                className="w-6 h-6 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-200 rounded"
+              >
                 +
               </button>
             </div>
-            <p>{(product.price * quantity).toFixed(2)}</p>
-            <button onClick={() => removeFromCart(product.id)}>Remove</button>
+
+            {/* Subtotal & Delete */}
+            <div className="flex items-center gap-6 min-w-140 justify-end">
+              <p className="font-bold text-slate-900 text-base">
+                ${(product.price * quantity).toFixed(2)}
+              </p>
+              <button
+                onClick={() => removeFromCart(product.id)}
+                className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
+              >
+                Remove
+              </button>
+            </div>
           </div>
         ))}
       </div>
-      <div>
-        <button onClick={clearCart}>Clear Cart</button>
-        <p>Total:${totalPrice.toFixed(2)}</p>
+
+      {/* Cart Summary Footer */}
+      <div className="bg-slate-100 rounded-xl p-4 flex items-center justify-between">
+        <button
+          onClick={clearCart}
+          className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+        >
+          Clear Cart
+        </button>
+
+        <div className="flex items-center gap-4">
+          <span className="text-slate-600 font-medium">Total:</span>
+          <span className="text-xl font-bold text-slate-900">
+            ${totalPrice.toFixed(2)}
+          </span>
+        </div>
       </div>
     </div>
   );
