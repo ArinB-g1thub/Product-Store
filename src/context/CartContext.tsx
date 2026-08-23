@@ -2,10 +2,13 @@ import type { CartItem, Product } from "@/types/product";
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+
+const CART_STORAGE_KEY = "product_store_cart";
 
 interface CartContextValue {
   items: CartItem[];
@@ -16,9 +19,27 @@ interface CartContextValue {
   totalItems: number;
   totalPrice: number;
 }
+
 const CartContext = createContext<CartContextValue | undefined>(undefined);
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (err) {
+      console.error("Failed to save cart items to localStorage", err);
+    }
+  }, [items]);
+
   function addToCart(product: Product) {
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
@@ -32,9 +53,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { product, quantity: 1 }];
     });
   }
+
   function removeFromCart(productId: number) {
     setItems((prev) => prev.filter((item) => item.product.id !== productId));
   }
+
   function updateQuantity(productId: number, quantity: number) {
     if (quantity <= 0) {
       removeFromCart(productId);
@@ -46,13 +69,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ),
     );
   }
+
   function clearCart() {
     setItems([]);
   }
+
   const totalItems = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity, 0),
     [items],
   );
+
   const totalPrice = useMemo(
     () =>
       items.reduce((sum, item) => sum + item.quantity * item.product.price, 0),
@@ -68,6 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     totalItems,
     totalPrice,
   };
+
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
